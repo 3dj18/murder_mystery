@@ -1,0 +1,45 @@
+BRUCE_WAYNE:
+  name: Bruce Wayne
+  nfc_uuid: 1234567890
+HARRY_POTTER:
+  name: Harry Potter
+  nfc_uuid: 1234567891
+BILBO_BAGGINS:
+  name: Bilbo Baggins
+  nfc_uuid: 1234567892
+VIOLET_Sorrengail :
+  name: Violet Sorrengail
+  nfc_uuid: 1234567893
+SHIKAMARU_NARA:
+  name: Shikamaru Nara
+  nfc_uuid: 1234567894
+INOSUKE_HASHIBIRA:
+  name: Inosuke Hashibira
+  nfc_uuid: 1234567895
+TENGEN_UZUI:
+  name: Tengen Uzui
+  nfc_uuid: 1234567896
+GOJO_SATORU:
+  name: Gojo Satoru
+  nfc_uuid: 1234567897
+LEVI_ACKERMAN:
+  name: Levi Ackerman
+  nfc_uuid: 1234567898
+AHSOKA_TANO:
+  name: Ahsoka Tano
+  nfc_uuid: 1234567899
+OBI_WAN_KENOBI:
+  name: Obi-Wan Kenobi
+  nfc_uuid: 1234567800
+ARAGORN:
+  name: Aragorn
+  nfc_uuid: 1234567801
+KORRA:
+  name: Korra
+  nfc_uuid: 1234567802
+JINX:
+  name: Jinx
+  nfc_uuid: 1234567803
+MAXIMUS_DECIMUS_MERIDIUS:
+  name: Maximus Decimus Meridius
+  nfc_uuid: 1234567804
