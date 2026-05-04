@@ -30,3 +30,11 @@ async def send_message(channel_key: str, message: str):
 
 def is_from_channel(message: discord.Message, channel_key: str) -> bool:
     return message.channel.id == CHANNEL_IDS[channel_key]
+
+async def send_to_channel(channel_id: int, message: str):
+    channel = client.get_channel(channel_id)
+
+    if channel is None:
+        channel = await client.fetch_channel(channel_id)
+
+    await channel.send(message)

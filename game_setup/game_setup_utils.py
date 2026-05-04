@@ -10,6 +10,10 @@ ROLES = ['player', 'murder', 'healer']
 MAX_HEALERS = 1
 MAX_MURDERS = 2
 
+
+def get_alive_player_names(players: list[Player]):
+    return [player.name for player in players if player.is_alive]
+
 def yaml_to_dict(path_to_file:str):
     with open(path_to_file, 'r') as file:
         return yaml.safe_load(file)
