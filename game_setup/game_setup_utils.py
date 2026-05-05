@@ -128,3 +128,18 @@ def start_round(players: list):
 
     for player in players:
         player.return_status()
+
+def get_killers(players: list):
+    killers = []
+    for player in players:
+        if player.role == 'murder':
+            killers.append(player)
+    return killers
+
+def get_healers(players: list):
+    healers = []
+    for player in players:
+        if player.role == 'healer':
+            healers.append(player)
+
+    return healers

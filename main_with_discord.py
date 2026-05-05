@@ -6,7 +6,9 @@ from game_setup.game_setup_utils import (
     yaml_to_dict,
     generate_players,
     find_closest_name,
-    get_alive_player_names
+    get_alive_player_names,
+    get_healers,
+    get_killers
 )
 
 load_dotenv()

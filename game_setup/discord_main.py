@@ -1,5 +1,5 @@
 from game_setup.discord_helper import client, TOKEN, send_message, is_from_channel
-from game_setup.game_setup_utils import yaml_to_dict, generate_players, find_closest_name, get_alive_player_names
+from game_setup.game_setup_utils import yaml_to_dict, generate_players, find_closest_name, get_alive_player_names, get_healers, get_killers
 
 import os
 import discord
@@ -26,7 +26,7 @@ players = []
 round_number = 1
 
 round_actions = {
-    "kills": {},          # discord_user_name: target_name
+    "kills": [],
     "heals": [],
     "murder_tie": None    # list of tied target names
 }
@@ -52,7 +52,7 @@ async def send_to_channel(channel_id: int, message: str):
 async def resolve_round():
     global round_number
 
-    kill_votes = list(round_actions["kills"].values())
+    kill_votes = round_actions["kills"]
     selected_kill = None
 
     if kill_votes:
@@ -160,6 +160,12 @@ async def on_ready():
         ALL_PLAYERS_CHANNEL_ID,
         "Murder Mystery game started."
     )
+
+    healers = get_healers(players)
+    killers = get_killers(players)
+    print(f"Healers: {', '.join(h.name for h in healers)}")
+    print(f"Killers: {', '.join(k. name for k in killers)}")
+
     await send_round_instructions()
 
 
@@ -186,7 +192,7 @@ async def on_message(message):
                 )
                 return
 
-            round_actions["kills"][message.author.name + f'_{str(random.randint)}'] = closest_name
+            round_actions["kills"].append(closest_name)
 
             await message.channel.send(
                 f"Kill submitted: {closest_name}"
