@@ -38,3 +38,35 @@ async def send_to_channel(channel_id: int, message: str):
         channel = await client.fetch_channel(channel_id)
 
     await channel.send(message)
+
+async def create_private_channel(
+    guild: discord.Guild,
+    channel_name: str,
+    allowed_members: list[discord.Member],
+    bot_member: discord.Member,
+):
+    overwrites = {
+        guild.default_role: discord.PermissionOverwrite(
+            view_channel=False
+        ),
+        bot_member: discord.PermissionOverwrite(
+            view_channel=True,
+            send_messages=True,
+            read_message_history=True,
+        ),
+    }
+
+    for member in allowed_members:
+        overwrites[member] = discord.PermissionOverwrite(
+            view_channel=True,
+            send_messages=True,
+            read_message_history=True,
+        )
+
+    channel = await guild.create_text_channel(
+        name=channel_name,
+        overwrites=overwrites,
+        reason="Create private murder mystery channel",
+    )
+
+    return channel

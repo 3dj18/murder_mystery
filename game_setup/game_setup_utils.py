@@ -66,7 +66,8 @@ def generate_players(player_info: dict):
             "name": player_data["name"],
             "role": role,
             "is_alive": True,
-            "nfc_uuid": player_data["nfc_uuid"]
+            "nfc_uuid": player_data["nfc_uuid"],
+            "discord_name": player_data["discord_user_name"],
         }
 
         if role == "healer":

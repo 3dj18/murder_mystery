@@ -1,4 +1,4 @@
-from game_setup.discord_helper import client, TOKEN, send_message, is_from_channel
+from game_setup.discord_helper import client, TOKEN, send_message, is_from_channel, create_private_channel
 from game_setup.game_setup_utils import yaml_to_dict, generate_players, find_closest_name, get_alive_player_names, get_healers, get_killers
 
 import os
@@ -13,9 +13,13 @@ load_dotenv()
 
 TOKEN = os.getenv("DISCORD_BOT_TOKEN")
 
-MURDERERS_CHANNEL_ID = int(os.getenv("MURDERERS_CHANNEL_ID"))
-HEALERS_CHANNEL_ID = int(os.getenv("HEALERS_CHANNEL_ID"))
+# MURDERERS_CHANNEL_ID = int(os.getenv("MURDERERS_CHANNEL_ID"))
+# HEALERS_CHANNEL_ID = int(os.getenv("HEALERS_CHANNEL_ID"))
 ALL_PLAYERS_CHANNEL_ID = int(os.getenv("ALL_PLAYERS_CHANNEL_ID"))
+KILLERS_CHANNEL = None
+KILLERS_CHANNEL_ID = 0
+HEALERS_CHANNEL = None
+HEALERS_CHANNEL_ID = 0
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -69,7 +73,7 @@ async def resolve_round():
             round_actions["murder_tie"] = tied_targets
 
             await send_to_channel(
-                MURDERERS_CHANNEL_ID,
+                KILLERS_CHANNEL_ID,
                 "The murderers did not agree.\n\n"
                 f"Tied targets: {', '.join(tied_targets)}\n\n"
                 "You have one more chance to agree. Submit again with "
@@ -83,7 +87,7 @@ async def resolve_round():
             selected_kill = random.choice(tied_targets)
 
             await send_to_channel(
-                MURDERERS_CHANNEL_ID,
+                KILLERS_CHANNEL_ID,
                 f"The murderers still did not agree. Random kill selected: {selected_kill}"
             )
 
@@ -100,6 +104,7 @@ async def resolve_round():
 
         if target:
             target.is_alive = True
+        selected_heal = target
 
     status_lines = []
 
@@ -112,6 +117,9 @@ async def resolve_round():
         if selected_kill
         else "The murderers did not kill anyone."
     )
+
+    if selected_kill == selected_heal.name:
+        kill_result = f'The murders attempted to kill {selected_kill}, However, the healer saved them!'
 
     await send_to_channel(
         ALL_PLAYERS_CHANNEL_ID,
@@ -134,11 +142,15 @@ async def resolve_round():
 @client.event
 async def send_round_instructions():
     global players
+    global KILLERS_CHANNEL
+    global KILLERS_CHANNEL_ID
+    global HEALERS_CHANNEL
+    global HEALERS_CHANNEL_ID
     alive_players = get_alive_player_names(players)
     players_list = "\n".join(alive_players)
 
     await send_to_channel(
-        MURDERERS_CHANNEL_ID,
+        KILLERS_CHANNEL_ID,
         f"Murderers: submit a kill with `kill Player Name`.\n Players Alive:\n {players_list}."
     )
 
@@ -147,9 +159,41 @@ async def send_round_instructions():
         f"Healers: submit a heal with `heal Player Name`. \n Players Alive:\n {players_list}."
     )
 
+async def get_discord_members(guild, game_players):
+    members = []
+
+    for player in game_players:
+        member = guild.get_member(player.discord_name)
+
+        if member is None:
+            member = await guild.fetch_member(player.discord_name)
+
+        members.append(member)
+
+    return members
+
+
+async def create_role_channel(guild, role_name, game_players, bot_member):
+    members = await get_discord_members(guild, game_players)
+    random_int = random.randint(0, 100)
+
+    channel = await create_private_channel(
+        guild=guild,
+        channel_name=f"{role_name}-room_{random_int}",
+        allowed_members=members,
+        bot_member=bot_member,
+    )
+
+    return channel
+
+
 @client.event
 async def on_ready():
     global players
+    global KILLERS_CHANNEL
+    global KILLERS_CHANNEL_ID
+    global HEALERS_CHANNEL
+    global HEALERS_CHANNEL_ID
 
     print(f"Logged in as {client.user}")
 
@@ -158,13 +202,31 @@ async def on_ready():
 
     await send_to_channel(
         ALL_PLAYERS_CHANNEL_ID,
-        "Murder Mystery game started."
+        ":ninja: Murder Mystery game started. :ninja:"
     )
 
     healers = get_healers(players)
     killers = get_killers(players)
     print(f"Healers: {', '.join(h.name for h in healers)}")
-    print(f"Killers: {', '.join(k. name for k in killers)}")
+    print(f"Killers: {', '.join(k.name for k in killers)}")
+
+    guild = client.guilds[0]
+    bot_member = guild.me
+    KILLERS_CHANNEL = await create_role_channel(
+        guild=guild,
+        role_name="murderers",
+        game_players=killers,
+        bot_member=bot_member,
+    )
+    KILLERS_CHANNEL_ID = KILLERS_CHANNEL.id
+
+    HEALERS_CHANNEL = await create_role_channel(
+        guild=guild,
+        role_name="healers",
+        game_players=healers,
+        bot_member=bot_member,
+    )
+    HEALERS_CHANNEL_ID = HEALERS_CHANNEL.id
 
     await send_round_instructions()
 
@@ -180,7 +242,7 @@ async def on_message(message):
 
     alive_names = get_alive_player_names(players)
 
-    if message.channel.id == MURDERERS_CHANNEL_ID:
+    if message.channel.id == KILLERS_CHANNEL_ID:
         if content.lower().startswith("kill "):
             raw_target = content[5:].strip()
 

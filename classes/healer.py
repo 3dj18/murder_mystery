@@ -2,8 +2,8 @@ from classes.player import Player
 
 class Healer(Player):
 
-    def __init__(self, name: str, role: str, is_alive: bool, nfc_uuid: str):
-        super().__init__(name, role, is_alive, nfc_uuid)
+    def __init__(self, name: str, role: str, is_alive: bool, nfc_uuid: str, discord_name: str):
+        super().__init__(name, role, is_alive, nfc_uuid, discord_name)
 
         self.heal_count = 0
 
