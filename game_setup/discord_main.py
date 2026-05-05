@@ -74,9 +74,12 @@ async def resolve_day_vote():
 
     game_state["phase"] = "results"
 
-    if game_state["vote_task"]:
+    current_task = asyncio.current_task()
+
+    if game_state["vote_task"] and game_state["vote_task"] !=  current_task :
         game_state["vote_task"].cancel()
-        game_state["vote_task"] = None
+
+    game_state["vote_task"] = None
 
     votes = list(game_state["votes"].values())
     voted_out = None
